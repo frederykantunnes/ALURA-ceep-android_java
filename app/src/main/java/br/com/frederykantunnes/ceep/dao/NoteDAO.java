@@ -13,7 +13,7 @@ public class NoteDAO {
         return (List<Note>) NOTES.clone();
     }
 
-    public static void insere(Note note){
+    public void insere(Note note){
         NoteDAO.NOTES.addAll(Arrays.asList(note));
     }
 

@@ -7,10 +7,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import java.util.ArrayList;
 import java.util.List;
 import br.com.frederykantunnes.ceep.R;
+import br.com.frederykantunnes.ceep.dao.NoteDAO;
 import br.com.frederykantunnes.ceep.model.Note;
+import br.com.frederykantunnes.ceep.ui.recyclerview.adapter.listener.OnItemClickListener;
 import br.com.frederykantunnes.ceep.ui.recyclerview.adapter.ListNotesAdapter;
 
 public class ListNotesActivity extends AppCompatActivity {
@@ -42,22 +43,54 @@ public class ListNotesActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(requestCode==1 && resultCode==2 && data.hasExtra("nota")){
-            Note noteReceived = (Note) data.getSerializableExtra("nota");
-            adiciona(noteReceived);
+            addNote(data);
+        }
+        if(requestCode==2 && resultCode==2 && data.hasExtra("nota") && data.hasExtra("posicao")){
+            alterNote(data);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    private void addNote(Intent data) {
+        Note noteReceived = (Note) data.getSerializableExtra("nota");
+        adiciona(noteReceived);
+    }
+
+    private void alterNote(Intent data) {
+        Note noteReceived = (Note) data.getSerializableExtra("nota");
+        int position = data.getIntExtra("posicao", -1);
+        new NoteDAO().altera(position, noteReceived);
+        adapter.altera(position, noteReceived);
+    }
+
     private void adapterConfigure() {
-        notes = new ArrayList<>();
+        notes = pegaTodas();
         RecyclerView listNotes = findViewById(R.id.list_notes_recycleview);
         adapter = new ListNotesAdapter(this, notes);
         listNotes.setAdapter(adapter);
+        adapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(Note note, int position) {
+                Intent intent = new Intent(ListNotesActivity.this, FormNoteActivity.class);
+                intent.putExtra("nota", note);
+                intent.putExtra("posicao", position);
+                startActivityForResult(intent, 2);
+            }
+        });
     }
 
+    public List<Note> pegaTodas(){
+        NoteDAO dao = new NoteDAO();
+        for (int i=0; i<10 ; i++){
+            dao.insere(new Note("Nota "+i, "Descricao da nota"+i));
+        }
+        return dao.todos();
+    }
 
     public void adiciona(Note note){
         notes.add(note);
         adapter.notifyDataSetChanged();
     }
+
+
 }

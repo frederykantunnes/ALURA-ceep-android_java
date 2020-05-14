@@ -13,12 +13,24 @@ import br.com.frederykantunnes.ceep.model.Note;
 
 public class FormNoteActivity extends AppCompatActivity {
     TextView description, title;
+    int position;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formulario_nota);
         setTitle("Nova Note");
         loadElements();
+        getDataForAlter();
+
+    }
+
+    private void getDataForAlter() {
+        if(getIntent().hasExtra("nota") && getIntent().hasExtra("posicao")) {
+            Note note = (Note) getIntent().getSerializableExtra("nota");
+            position = getIntent().getIntExtra("posicao", -1);
+            title.setText(note.getTitle());
+            description.setText(note.getDescription());
+        }
     }
 
     private void loadElements() {
@@ -47,13 +59,15 @@ public class FormNoteActivity extends AppCompatActivity {
     private void clickEvent() {
         Intent intent = new Intent();
         intent.putExtra("nota", save());
+        intent.putExtra("posicao", position);
         setResult(2, intent);
         finish();
     }
 
     private Note save() {
+        NoteDAO dao = new NoteDAO();
         Note note = new Note(title.getText().toString(), description.getText().toString());
-        NoteDAO.insere(note);
+        dao.insere(note);
         return note;
     }
 }
