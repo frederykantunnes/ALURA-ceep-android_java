@@ -2,6 +2,8 @@ package br.com.frederykantunnes.ceep.ui.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -18,18 +20,19 @@ public class FormNoteActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formulario_nota);
-        setTitle("Nova Note");
         loadElements();
         getDataForAlter();
-
     }
 
     private void getDataForAlter() {
-        if(getIntent().hasExtra("nota") && getIntent().hasExtra("posicao")) {
+        if(getIntent().hasExtra("nota")) {
+            setTitle("Note Edit");
             Note note = (Note) getIntent().getSerializableExtra("nota");
             position = getIntent().getIntExtra("posicao", -1);
             title.setText(note.getTitle());
             description.setText(note.getDescription());
+        }else{
+            setTitle("New Note");
         }
     }
 
@@ -60,7 +63,7 @@ public class FormNoteActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.putExtra("nota", save());
         intent.putExtra("posicao", position);
-        setResult(2, intent);
+        setResult(Activity.RESULT_OK, intent);
         finish();
     }
 

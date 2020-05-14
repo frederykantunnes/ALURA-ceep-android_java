@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.Collections;
 import java.util.List;
 import br.com.frederykantunnes.ceep.R;
 import br.com.frederykantunnes.ceep.model.Note;
@@ -45,7 +47,16 @@ public class ListNotesAdapter extends RecyclerView.Adapter<ListNotesAdapter.Note
 
     public void altera(int position, Note noteReceived) {
         notes.set(position, noteReceived);
-        notifyDataSetChanged();
+    }
+
+    public void remove(int adapterPosition) {
+        notes.remove(adapterPosition);
+        notifyItemRemoved(adapterPosition);
+    }
+
+    public void troca(int inicialP, int finalP) {
+        Collections.swap(notes,inicialP, finalP);
+        notifyItemMoved(inicialP,finalP);
     }
 
     class NoteViewHolder extends RecyclerView.ViewHolder{

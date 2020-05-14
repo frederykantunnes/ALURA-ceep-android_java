@@ -2,7 +2,10 @@ package br.com.frederykantunnes.ceep.ui.activity;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -13,6 +16,7 @@ import br.com.frederykantunnes.ceep.dao.NoteDAO;
 import br.com.frederykantunnes.ceep.model.Note;
 import br.com.frederykantunnes.ceep.ui.recyclerview.adapter.listener.OnItemClickListener;
 import br.com.frederykantunnes.ceep.ui.recyclerview.adapter.ListNotesAdapter;
+import br.com.frederykantunnes.ceep.ui.recyclerview.helper.callback.NotaItemTouchCallback;
 
 public class ListNotesActivity extends AppCompatActivity {
 
@@ -42,11 +46,13 @@ public class ListNotesActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if(requestCode==1 && resultCode==2 && data.hasExtra("nota")){
-            addNote(data);
-        }
-        if(requestCode==2 && resultCode==2 && data.hasExtra("nota") && data.hasExtra("posicao")){
-            alterNote(data);
+        if(resultCode == Activity.RESULT_OK){
+            if(requestCode==1 && data.hasExtra("nota")){
+                addNote(data);
+            }
+            if(requestCode==2 && data.hasExtra("nota") && data.hasExtra("posicao")){
+                alterNote(data);
+            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -71,19 +77,22 @@ public class ListNotesActivity extends AppCompatActivity {
         adapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(Note note, int position) {
-                Intent intent = new Intent(ListNotesActivity.this, FormNoteActivity.class);
-                intent.putExtra("nota", note);
-                intent.putExtra("posicao", position);
-                startActivityForResult(intent, 2);
+                goStartForm(note, position);
             }
         });
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new NotaItemTouchCallback(adapter));
+        itemTouchHelper.attachToRecyclerView(listNotes);
+    }
+
+    private void goStartForm(Note note, int position) {
+        Intent intent = new Intent(ListNotesActivity.this, FormNoteActivity.class);
+        intent.putExtra("nota", note);
+        intent.putExtra("posicao", position);
+        startActivityForResult(intent, 2);
     }
 
     public List<Note> pegaTodas(){
         NoteDAO dao = new NoteDAO();
-        for (int i=0; i<10 ; i++){
-            dao.insere(new Note("Nota "+i, "Descricao da nota"+i));
-        }
         return dao.todos();
     }
 
